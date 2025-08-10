@@ -107,9 +107,7 @@ export async function updateInvoice(id: string, formData: FormData) {
     WHERE id = ${id}
   `;
   } catch (error) {
-    return {
-      message: "Database Error: Failed to Create Invoice.",
-    };
+    console.log(`Database Error: Failed to Update Invoice. ${error}`);
   }
 
   revalidatePath("/dashboard/invoices");
@@ -117,17 +115,8 @@ export async function updateInvoice(id: string, formData: FormData) {
 }
 
 export async function deleteInvoice(id: string) {
-  throw new Error("Failed to Delete Invoice");
   if (!id) return console.log("ERROR: no id given");
 
   await sql`DELETE from invoices WHERE id = ${id}`;
   revalidatePath("/dashboard/invoices");
 }
-
-/* Steps in actions
- * 1. create a form schema
- * 2. get the data from form data/props
- * 3. parse the data to the schema
- * 4. insert it to the database
- * 5. revalidate path & redirect
- */
