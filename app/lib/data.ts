@@ -7,7 +7,7 @@ import {
   LatestInvoiceRaw,
   Revenue,
 } from './definitions';
-import { formatCurrency } from './utils';
+import { formatCurrency, isValidUUID } from './utils';
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
@@ -16,12 +16,12 @@ export async function fetchRevenue() {
     // Artificially delay a response for demo purposes.
     // Don't do this in production :)
 
-    // console.log('Fetching revenue data...');
-    // await new Promise((resolve) => setTimeout(resolve, 3000));
+    console.log('Fetching revenue data...');
+    await new Promise((resolve) => setTimeout(resolve, 3000));
 
     const data = await sql<Revenue[]>`SELECT * FROM revenue`;
 
-    // console.log('Data fetch completed after 3 seconds.');
+    console.log('Data fetch completed after 3 seconds.');
 
     return data;
   } catch (error) {
@@ -88,7 +88,7 @@ export async function fetchCardData() {
 const ITEMS_PER_PAGE = 6;
 export async function fetchFilteredInvoices(
   query: string,
-  currentPage: number,
+  currentPage: number
 ) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
@@ -143,6 +143,13 @@ export async function fetchInvoicesPages(query: string) {
 }
 
 export async function fetchInvoiceById(id: string) {
+  const isUUID = isValidUUID(id);
+  
+  // return undefined if the id is not valid uuid, throwing the not found page instead of the catch all page
+  if (!isUUID) {
+    return undefined;
+  }
+
   try {
     const data = await sql<InvoiceForm[]>`
       SELECT
@@ -159,7 +166,6 @@ export async function fetchInvoiceById(id: string) {
       // Convert amount from cents to dollars
       amount: invoice.amount / 100,
     }));
-
     return invoice[0];
   } catch (error) {
     console.error('Database Error:', error);

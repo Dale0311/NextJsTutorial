@@ -4,7 +4,10 @@ import {
   UserGroupIcon,
   InboxIcon,
 } from '@heroicons/react/24/outline';
-import { lusitana } from '@/app/ui/fonts';
+import { lusitana } from '../fonts';
+import { fetchCardData } from '@/app/lib/data';
+import { Suspense } from 'react';
+import { CardSkeleton } from '../skeletons';
 
 const iconMap = {
   collected: BanknotesIcon,
@@ -16,21 +19,23 @@ const iconMap = {
 export default async function CardWrapper() {
   return (
     <>
-      {/* NOTE: Uncomment this code in Chapter 9 */}
-
-      {/* <Card title="Collected" value={totalPaidInvoices} type="collected" />
-      <Card title="Pending" value={totalPendingInvoices} type="pending" />
-      <Card title="Total Invoices" value={numberOfInvoices} type="invoices" />
-      <Card
-        title="Total Customers"
-        value={numberOfCustomers}
-        type="customers"
-      /> */}
+      <Suspense fallback={<CardSkeleton />}>
+        <TotalPaidInvoices />
+      </Suspense>
+      <Suspense fallback={<CardSkeleton />}>
+        <TotalPendingInvoices />
+      </Suspense>
+      <Suspense fallback={<CardSkeleton />}>
+        <NumberOfInvoices />
+      </Suspense>
+      <Suspense fallback={<CardSkeleton />}>
+        <NumberOfCustomers />
+      </Suspense>
     </>
   );
 }
 
-export function Card({
+export async function Card({
   title,
   value,
   type,
@@ -55,4 +60,27 @@ export function Card({
       </p>
     </div>
   );
+}
+
+export async function TotalPaidInvoices() {
+  const { totalPaidInvoices } = await fetchCardData();
+  await new Promise((resolve) => setTimeout(resolve, 50));
+  return <Card title="Collected" value={totalPaidInvoices} type="collected" />;
+}
+export async function TotalPendingInvoices() {
+  const { totalPendingInvoices } = await fetchCardData();
+  await new Promise((resolve) => setTimeout(resolve, 80));
+  return (
+    <Card title="Collected" value={totalPendingInvoices} type="collected" />
+  );
+}
+export async function NumberOfInvoices() {
+  const { numberOfInvoices } = await fetchCardData();
+  await new Promise((resolve) => setTimeout(resolve, 100));
+  return <Card title="Collected" value={numberOfInvoices} type="collected" />;
+}
+export async function NumberOfCustomers() {
+  const { numberOfCustomers } = await fetchCardData();
+  await new Promise((resolve) => setTimeout(resolve, 120));
+  return <Card title="Collected" value={numberOfCustomers} type="collected" />;
 }
